@@ -52,7 +52,7 @@ func cleanWord(in string) word {
 	in = strings.ToLower(in)
 	in = strings.TrimFunc(in, func(c rune) bool {
 		// not [0-9] and not [a-z] and not \-
-		return (c < 48 && c > 57) && (c < 65 && c > 90) && c != 45
+		return (c < 48 || c > 57) && (c < 97 || c > 122) && c != 45
 	})
 	return word(in)
 }
