@@ -14,16 +14,35 @@ func main() {
 		fmt.Println("Usage of the utility: ./t2 file1.txt file2.txt")
 		return
 	}
-	fmt.Println("Reading files:", os.Args[1:])
 
-	index := index.New()
-	for _, file := range os.Args[1:] {
-		reed, err := ioutil.ReadFile(file)
-		if err != nil {
-			fmt.Printf("error reading file %q, skip\n", file)
-			continue
+	files := os.Args[1:]
+	fmt.Println("Reading files: ", files)
+
+	indexes := make(chan index.Index, len(files))
+
+	for _, file := range files {
+		go func(filename string) {
+			index := index.New()
+			defer func() {
+				indexes <- index
+			}()
+			reed, err := ioutil.ReadFile(filename)
+			if err != nil {
+				fmt.Printf("error reading file %q, skip\n", file)
+				return
+			}
+			index.Add(string(reed), filename)
+		}(file)
+	}
+
+	var index index.Index
+
+	for i := 0; i < len(files); i++ {
+		if index == nil {
+			index = <-indexes
+		} else {
+			index.Merge(<-indexes)
 		}
-		index.Add(string(reed), file)
 	}
 
 	fmt.Printf("%+v\n", index.Info())
