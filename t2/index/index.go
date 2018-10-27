@@ -24,7 +24,7 @@ func New() Index {
 }
 
 func (i *Index) Add(data, filename string) error {
-	rawWords := strings.Split(data, " ")
+	rawWords := strings.Fields(data)
 	for _, rawWord := range rawWords {
 		newWord := cleanWord(rawWord)
 		i.addWord(newWord, file(filename))
