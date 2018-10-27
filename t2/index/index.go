@@ -73,7 +73,7 @@ func (i Index) Search(query string) ([]Result, error) {
 
 func (i Index) searchWord(qToken token, previous occurrences) occurrences {
 	if _, ok := i[qToken]; !ok {
-		return previous
+		return nil
 	}
 	os := occurrences{}
 	for filename, count := range i[qToken] {
