@@ -18,6 +18,38 @@ func main() {
 	files := os.Args[1:]
 	fmt.Println("Reading files: ", files)
 
+	// index := singleLoad(files)
+	index := parallelLoad(files)
+
+	fmt.Printf("%+v\n", index.Info())
+
+	for {
+		q := readQuery()
+		results, err := index.Search(q)
+		if err != nil {
+			fmt.Printf("error searching: %q\n", err)
+			continue
+		}
+		for _, result := range results {
+			fmt.Printf("%s -- %d\n", result.File, result.Count)
+		}
+	}
+}
+
+func singleLoad(files []string) index.Index {
+	index := index.New()
+	for _, file := range files {
+		reed, err := ioutil.ReadFile(file)
+		if err != nil {
+			fmt.Printf("error reading file %q, skip\n", file)
+			continue
+		}
+		index.Add(string(reed), file)
+	}
+	return index
+}
+
+func parallelLoad(files []string) index.Index {
 	indexes := make(chan index.Index, len(files))
 
 	for _, file := range files {
@@ -44,20 +76,7 @@ func main() {
 			index.Merge(<-indexes)
 		}
 	}
-
-	fmt.Printf("%+v\n", index.Info())
-
-	for {
-		q := readQuery()
-		results, err := index.Search(q)
-		if err != nil {
-			fmt.Printf("error searching: %q\n", err)
-			continue
-		}
-		for _, result := range results {
-			fmt.Printf("%s -- %d\n", result.File, result.Count)
-		}
-	}
+	return index
 }
 
 func readQuery() string {
