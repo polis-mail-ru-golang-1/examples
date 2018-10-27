@@ -17,3 +17,9 @@ func BenchmarkParallel(b *testing.B) {
 		parallelLoad(files)
 	}
 }
+
+func BenchmarkMutex(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		mutexLoad(files)
+	}
+}

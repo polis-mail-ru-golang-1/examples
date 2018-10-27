@@ -5,8 +5,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"sync"
 
 	"github.com/polis-mail-ru-golang-1/examples/t2/index"
+)
+
+var (
+	idxMutex = sync.RWMutex{}
 )
 
 func main() {
@@ -19,7 +24,8 @@ func main() {
 	fmt.Println("Reading files: ", files)
 
 	// index := singleLoad(files)
-	index := parallelLoad(files)
+	// index := parallelLoad(files)
+	index := mutexLoad(files)
 
 	fmt.Printf("%+v\n", index.Info())
 
@@ -46,6 +52,27 @@ func singleLoad(files []string) index.Index {
 		}
 		index.Add(string(reed), file)
 	}
+	return index
+}
+
+func mutexLoad(files []string) index.Index {
+	index := index.New()
+	wg := sync.WaitGroup{}
+	for _, file := range files {
+		wg.Add(1)
+		go func(filename string, wg *sync.WaitGroup) {
+			defer wg.Done()
+			reed, err := ioutil.ReadFile(filename)
+			if err != nil {
+				fmt.Printf("error reading file %q, skip\n", file)
+				return
+			}
+			idxMutex.Lock()
+			index.Add(string(reed), filename)
+			idxMutex.Unlock()
+		}(file, &wg)
+	}
+	wg.Wait()
 	return index
 }
 
