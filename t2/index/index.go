@@ -23,7 +23,7 @@ func New() Index {
 	return Index{}
 }
 
-func (i *Index) Add(data, filename string) error {
+func (i Index) Add(data, filename string) error {
 	rawWords := strings.Fields(data)
 	for _, rawWord := range rawWords {
 		newWord := cleanWord(rawWord)
@@ -32,19 +32,19 @@ func (i *Index) Add(data, filename string) error {
 	return nil
 }
 
-func (i *Index) addWord(newWord word, filename file) {
-	if _, ok := (*i)[newWord]; !ok {
-		(*i)[newWord] = occurrences{}
+func (i Index) addWord(newWord word, filename file) {
+	if _, ok := i[newWord]; !ok {
+		i[newWord] = occurrences{}
 	}
-	os := (*i)[newWord]
+	os := i[newWord]
 	os.addFile(filename)
 }
 
-func (os *occurrences) addFile(filename file) {
-	if _, ok := (*os)[filename]; !ok {
-		(*os)[filename] = 1
+func (os occurrences) addFile(filename file) {
+	if _, ok := os[filename]; !ok {
+		os[filename] = 1
 	} else {
-		(*os)[filename]++
+		os[filename]++
 	}
 }
 
@@ -57,7 +57,7 @@ func cleanWord(in string) word {
 	return word(in)
 }
 
-func (i *Index) Search(query string) ([]Result, error) {
+func (i Index) Search(query string) ([]Result, error) {
 	rawWords := strings.Split(query, " ")
 	os := occurrences{}
 	for _, rawWord := range rawWords {
@@ -75,12 +75,12 @@ func (i *Index) Search(query string) ([]Result, error) {
 	return results, nil
 }
 
-func (i *Index) searchWord(qWord word, previous occurrences) occurrences {
-	if _, ok := (*i)[qWord]; !ok {
+func (i Index) searchWord(qWord word, previous occurrences) occurrences {
+	if _, ok := i[qWord]; !ok {
 		return previous
 	}
 	os := occurrences{}
-	for filename, count := range (*i)[qWord] {
+	for filename, count := range i[qWord] {
 		if in(previous, filename) || len(previous) == 0 {
 			os[filename] = previous[filename] + count
 		}
@@ -89,8 +89,8 @@ func (i *Index) searchWord(qWord word, previous occurrences) occurrences {
 }
 
 func in(os occurrences, filename file) bool {
-	for idxFilenam := range os {
-		if idxFilenam == filename {
+	for idxFilename := range os {
+		if idxFilename == filename {
 			return true
 		}
 	}
