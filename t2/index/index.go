@@ -1,11 +1,19 @@
 package index
 
 import (
+	"bufio"
 	"github.com/reiver/go-porterstemmer"
+	"io"
 	"strings"
+	"sync"
 )
 
-type Index map[token]occurrences
+type Index struct {
+	idx    IndexMap
+	tokenc chan pair
+	wg     *sync.WaitGroup
+}
+type IndexMap map[token]occurrences
 type occurrences map[file]count
 type token string
 type file string
@@ -20,40 +28,58 @@ type Stat struct {
 	Count int
 }
 
-func New() Index {
-	return Index{}
+type pair struct {
+	Filename file
+	Token    token
 }
 
-func (i Index) Merge(i2 Index) {
-	for tkn2, os2 := range i2 {
-		if _, ok := i[tkn2]; !ok {
-			i[tkn2] = os2
-		} else {
-			i[tkn2].merge(os2)
+func New(buffer int) Index {
+	idx := Index{
+		idx:    IndexMap{},
+		tokenc: make(chan pair, buffer),
+		wg:     &sync.WaitGroup{},
+	}
+	go idx.readTokens()
+	return idx
+}
+
+func (i Index) Wait() {
+	i.wg.Wait()
+}
+
+func (i Index) Read(data *bufio.Reader, filename string) error {
+	i.wg.Add(1)
+	go func(r *bufio.Reader, filename string) {
+		defer i.wg.Done()
+		for {
+			raw, err := r.ReadString(' ')
+			if err == io.EOF && raw == "" {
+				break
+			}
+			words := strings.Split(raw, "\n")
+			for _, word := range words {
+				tkn := cleanWord(word)
+				i.tokenc <- pair{
+					Filename: file(filename),
+					Token:    tkn,
+				}
+			}
 		}
-	}
-}
-
-func (os occurrences) merge(os2 occurrences) {
-	for filename2, count2 := range os2 {
-		os[filename2] += count2
-	}
-}
-
-func (i Index) Add(data, filename string) error {
-	words := strings.Fields(data)
-	for _, word := range words {
-		tkn := cleanWord(word)
-		i.addToken(tkn, file(filename))
-	}
+	}(data, filename)
 	return nil
 }
 
-func (i Index) addToken(newTkn token, filename file) {
-	if _, ok := i[newTkn]; !ok {
-		i[newTkn] = occurrences{}
+func (i Index) readTokens() {
+	for p := range i.tokenc {
+		i.addToken(p.Token, p.Filename)
 	}
-	os := i[newTkn]
+}
+
+func (i Index) addToken(newTkn token, filename file) {
+	if _, ok := i.idx[newTkn]; !ok {
+		i.idx[newTkn] = occurrences{}
+	}
+	os := i.idx[newTkn]
 	os.addFile(filename)
 }
 
@@ -90,11 +116,11 @@ func (i Index) Search(query string) ([]Result, error) {
 }
 
 func (i Index) searchToken(tkn token, prev occurrences) occurrences {
-	if _, ok := i[tkn]; !ok {
+	if _, ok := i.idx[tkn]; !ok {
 		return nil
 	}
 	os := occurrences{}
-	for filename, count := range i[tkn] {
+	for filename, count := range i.idx[tkn] {
 		if in(prev, filename) || len(prev) == 0 {
 			os[filename] = prev[filename] + count
 		}
@@ -113,6 +139,6 @@ func in(os occurrences, filename file) bool {
 
 func (i Index) Info() Stat {
 	return Stat{
-		Count: len(i),
+		Count: len(i.idx),
 	}
 }

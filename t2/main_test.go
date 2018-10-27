@@ -6,20 +6,20 @@ var (
 	files = []string{"books/hard", "books/noon", "books/prisoners", "books/time"}
 )
 
-func BenchmarkSingle(b *testing.B) {
+func BenchmarkReading0(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		singleLoad(files)
+		readingLoad(files, 0)
 	}
 }
 
-func BenchmarkParallel(b *testing.B) {
+func BenchmarkReading100(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		parallelLoad(files)
+		readingLoad(files, 100)
 	}
 }
 
-func BenchmarkMutex(b *testing.B) {
+func BenchmarkReading100000(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		mutexLoad(files)
+		readingLoad(files, 100000)
 	}
 }
