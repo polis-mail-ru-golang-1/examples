@@ -4,9 +4,9 @@ import (
 	"strings"
 )
 
-type Index map[word]occurrences
+type Index map[token]occurrences
 type occurrences map[file]count
-type word string
+type token string
 type file string
 type count int
 
@@ -24,45 +24,41 @@ func New() Index {
 }
 
 func (i Index) Add(data, filename string) error {
-	rawWords := strings.Fields(data)
-	for _, rawWord := range rawWords {
-		newWord := cleanWord(rawWord)
-		i.addWord(newWord, file(filename))
+	words := strings.Fields(data)
+	for _, word := range words {
+		token := cleanWord(word)
+		i.addToken(token, file(filename))
 	}
 	return nil
 }
 
-func (i Index) addWord(newWord word, filename file) {
-	if _, ok := i[newWord]; !ok {
-		i[newWord] = occurrences{}
+func (i Index) addToken(newToken token, filename file) {
+	if _, ok := i[newToken]; !ok {
+		i[newToken] = occurrences{}
 	}
-	os := i[newWord]
+	os := i[newToken]
 	os.addFile(filename)
 }
 
 func (os occurrences) addFile(filename file) {
-	if _, ok := os[filename]; !ok {
-		os[filename] = 1
-	} else {
-		os[filename]++
-	}
+	os[filename]++
 }
 
-func cleanWord(in string) word {
+func cleanWord(in string) token {
 	in = strings.ToLower(in)
 	in = strings.TrimFunc(in, func(c rune) bool {
 		// not [0-9] and not [a-z] and not \-
 		return (c < 48 || c > 57) && (c < 97 || c > 122) && c != 45
 	})
-	return word(in)
+	return token(in)
 }
 
 func (i Index) Search(query string) ([]Result, error) {
-	rawWords := strings.Split(query, " ")
+	words := strings.Split(query, " ")
 	os := occurrences{}
-	for _, rawWord := range rawWords {
-		qWord := cleanWord(rawWord)
-		os = i.searchWord(qWord, os)
+	for _, word := range words {
+		token := cleanWord(word)
+		os = i.searchWord(token, os)
 	}
 
 	results := make([]Result, 0, len(os))
@@ -75,12 +71,12 @@ func (i Index) Search(query string) ([]Result, error) {
 	return results, nil
 }
 
-func (i Index) searchWord(qWord word, previous occurrences) occurrences {
-	if _, ok := i[qWord]; !ok {
+func (i Index) searchWord(qToken token, previous occurrences) occurrences {
+	if _, ok := i[qToken]; !ok {
 		return previous
 	}
 	os := occurrences{}
-	for filename, count := range i[qWord] {
+	for filename, count := range i[qToken] {
 		if in(previous, filename) || len(previous) == 0 {
 			os[filename] = previous[filename] + count
 		}
