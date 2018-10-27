@@ -4,8 +4,8 @@ import (
 	"strings"
 )
 
-type Index map[word]occurences
-type occurences map[file]count
+type Index map[word]occurrences
+type occurrences map[file]count
 type word string
 type file string
 type count int
@@ -34,13 +34,13 @@ func (i *Index) Add(data, filename string) error {
 
 func (i *Index) addWord(newWord word, filename file) {
 	if _, ok := (*i)[newWord]; !ok {
-		(*i)[newWord] = occurences{}
+		(*i)[newWord] = occurrences{}
 	}
 	os := (*i)[newWord]
 	os.addFile(filename)
 }
 
-func (os *occurences) addFile(filename file) {
+func (os *occurrences) addFile(filename file) {
 	if _, ok := (*os)[filename]; !ok {
 		(*os)[filename] = 1
 	} else {
@@ -59,7 +59,7 @@ func cleanWord(in string) word {
 
 func (i *Index) Search(query string) ([]Result, error) {
 	rawWords := strings.Split(query, " ")
-	os := occurences{}
+	os := occurrences{}
 	for _, rawWord := range rawWords {
 		qWord := cleanWord(rawWord)
 		os = i.searchWord(qWord, os)
@@ -75,11 +75,11 @@ func (i *Index) Search(query string) ([]Result, error) {
 	return results, nil
 }
 
-func (i *Index) searchWord(qWord word, previous occurences) occurences {
+func (i *Index) searchWord(qWord word, previous occurrences) occurrences {
 	if _, ok := (*i)[qWord]; !ok {
 		return nil
 	}
-	os := occurences{}
+	os := occurrences{}
 	for filename, count := range (*i)[qWord] {
 		if in(previous, filename) || len(previous) == 0 {
 			os[filename] = previous[filename] + count
@@ -88,7 +88,7 @@ func (i *Index) searchWord(qWord word, previous occurences) occurences {
 	return os
 }
 
-func in(os occurences, filename file) bool {
+func in(os occurrences, filename file) bool {
 	for idxFilenam := range os {
 		if idxFilenam == filename {
 			return true
