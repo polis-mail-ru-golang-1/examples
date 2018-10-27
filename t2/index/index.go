@@ -1,6 +1,7 @@
 package index
 
 import (
+	"github.com/reiver/go-porterstemmer"
 	"strings"
 )
 
@@ -66,6 +67,7 @@ func cleanWord(in string) token {
 		// not [0-9] and not [a-z] and not \-
 		return (c < 48 || c > 57) && (c < 97 || c > 122) && c != 45
 	})
+	in = porterstemmer.StemString(in)
 	return token(in)
 }
 
