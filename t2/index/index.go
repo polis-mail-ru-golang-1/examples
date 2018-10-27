@@ -77,7 +77,7 @@ func (i *Index) Search(query string) ([]Result, error) {
 
 func (i *Index) searchWord(qWord word, previous occurrences) occurrences {
 	if _, ok := (*i)[qWord]; !ok {
-		return nil
+		return previous
 	}
 	os := occurrences{}
 	for filename, count := range (*i)[qWord] {

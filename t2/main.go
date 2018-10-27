@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -17,12 +18,12 @@ func main() {
 
 	index := index.New()
 	for _, file := range os.Args[1:] {
-		readed, err := ioutil.ReadFile(file)
+		reed, err := ioutil.ReadFile(file)
 		if err != nil {
 			fmt.Printf("error reading file %q, skip\n", file)
 			continue
 		}
-		index.Add(string(readed), file)
+		index.Add(string(reed), file)
 	}
 
 	fmt.Printf("%+v\n", index.Info())
@@ -41,8 +42,8 @@ func main() {
 }
 
 func readQuery() string {
+	reader := bufio.NewReader(os.Stdin)
 	fmt.Print("Enter query: ")
-	var in string
-	fmt.Scanln(&in)
+	in, _ := reader.ReadString('\n')
 	return in
 }
