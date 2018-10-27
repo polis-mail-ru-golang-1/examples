@@ -97,8 +97,8 @@ func in(os occurrences, filename file) bool {
 	return false
 }
 
-func (i *Index) Info() Stat {
+func (i Index) Info() Stat {
 	return Stat{
-		Count: len(*i),
+		Count: len(i),
 	}
 }
