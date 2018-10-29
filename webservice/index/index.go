@@ -1,5 +1,7 @@
 package index
 
+import "strings"
+
 type Index struct {
 }
 
@@ -15,6 +17,9 @@ func New() Index {
 func (i Index) AddFile(name string) {}
 
 func (i Index) Search(query string) []Result {
+	query = strings.ToLower(query)
+	// prepare query here, split, stem, etc...
+
 	return []Result{
 		{
 			Name:  "a",
