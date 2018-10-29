@@ -14,7 +14,7 @@ func New() Index {
 	return Index{}
 }
 
-func (i Index) AddFile(name string) {}
+func (i Index) AddFile(name, content string) {}
 
 func (i Index) Search(query string) []Result {
 	query = strings.ToLower(query)
