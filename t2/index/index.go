@@ -1,6 +1,7 @@
 package index
 
 import (
+	"github.com/reiver/go-porterstemmer"
 	"strings"
 )
 
@@ -23,20 +24,36 @@ func New() Index {
 	return Index{}
 }
 
+func (i Index) Merge(i2 Index) {
+	for tkn2, os2 := range i2 {
+		if _, ok := i[tkn2]; !ok {
+			i[tkn2] = os2
+		} else {
+			i[tkn2].merge(os2)
+		}
+	}
+}
+
+func (os occurrences) merge(os2 occurrences) {
+	for filename2, count2 := range os2 {
+		os[filename2] += count2
+	}
+}
+
 func (i Index) Add(data, filename string) error {
 	words := strings.Fields(data)
 	for _, word := range words {
-		token := cleanWord(word)
-		i.addToken(token, file(filename))
+		tkn := cleanWord(word)
+		i.addToken(tkn, file(filename))
 	}
 	return nil
 }
 
-func (i Index) addToken(newToken token, filename file) {
-	if _, ok := i[newToken]; !ok {
-		i[newToken] = occurrences{}
+func (i Index) addToken(newTkn token, filename file) {
+	if _, ok := i[newTkn]; !ok {
+		i[newTkn] = occurrences{}
 	}
-	os := i[newToken]
+	os := i[newTkn]
 	os.addFile(filename)
 }
 
@@ -50,6 +67,7 @@ func cleanWord(in string) token {
 		// not [0-9] and not [a-z] and not \-
 		return (c < 48 || c > 57) && (c < 97 || c > 122) && c != 45
 	})
+	in = porterstemmer.StemString(in)
 	return token(in)
 }
 
@@ -57,8 +75,8 @@ func (i Index) Search(query string) ([]Result, error) {
 	words := strings.Split(query, " ")
 	os := occurrences{}
 	for _, word := range words {
-		token := cleanWord(word)
-		os = i.searchWord(token, os)
+		tkn := cleanWord(word)
+		os = i.searchToken(tkn, os)
 	}
 
 	results := make([]Result, 0, len(os))
@@ -71,14 +89,14 @@ func (i Index) Search(query string) ([]Result, error) {
 	return results, nil
 }
 
-func (i Index) searchWord(qToken token, previous occurrences) occurrences {
-	if _, ok := i[qToken]; !ok {
+func (i Index) searchToken(tkn token, prev occurrences) occurrences {
+	if _, ok := i[tkn]; !ok {
 		return nil
 	}
 	os := occurrences{}
-	for filename, count := range i[qToken] {
-		if in(previous, filename) || len(previous) == 0 {
-			os[filename] = previous[filename] + count
+	for filename, count := range i[tkn] {
+		if in(prev, filename) || len(prev) == 0 {
+			os[filename] = prev[filename] + count
 		}
 	}
 	return os

@@ -5,8 +5,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"sync"
 
 	"github.com/polis-mail-ru-golang-1/examples/t2/index"
+)
+
+var (
+	idxMutex = sync.RWMutex{}
 )
 
 func main() {
@@ -14,17 +19,13 @@ func main() {
 		fmt.Println("Usage of the utility: ./t2 file1.txt file2.txt")
 		return
 	}
-	fmt.Println("Reading files:", os.Args[1:])
 
-	index := index.New()
-	for _, file := range os.Args[1:] {
-		reed, err := ioutil.ReadFile(file)
-		if err != nil {
-			fmt.Printf("error reading file %q, skip\n", file)
-			continue
-		}
-		index.Add(string(reed), file)
-	}
+	files := os.Args[1:]
+	fmt.Println("Reading files: ", files)
+
+	// index := singleLoad(files)
+	// index := parallelLoad(files)
+	index := mutexLoad(files)
 
 	fmt.Printf("%+v\n", index.Info())
 
@@ -39,6 +40,70 @@ func main() {
 			fmt.Printf("%s -- %d\n", result.File, result.Count)
 		}
 	}
+}
+
+func singleLoad(files []string) index.Index {
+	index := index.New()
+	for _, file := range files {
+		reed, err := ioutil.ReadFile(file)
+		if err != nil {
+			fmt.Printf("error reading file %q, skip\n", file)
+			continue
+		}
+		index.Add(string(reed), file)
+	}
+	return index
+}
+
+func mutexLoad(files []string) index.Index {
+	index := index.New()
+	wg := sync.WaitGroup{}
+	for _, file := range files {
+		wg.Add(1)
+		go func(filename string, wg *sync.WaitGroup) {
+			defer wg.Done()
+			reed, err := ioutil.ReadFile(filename)
+			if err != nil {
+				fmt.Printf("error reading file %q, skip\n", file)
+				return
+			}
+			idxMutex.Lock()
+			index.Add(string(reed), filename)
+			idxMutex.Unlock()
+		}(file, &wg)
+	}
+	wg.Wait()
+	return index
+}
+
+func parallelLoad(files []string) index.Index {
+	indexes := make(chan index.Index, len(files))
+
+	for _, file := range files {
+		go func(filename string) {
+			index := index.New()
+			defer func() {
+				indexes <- index
+			}()
+			reed, err := ioutil.ReadFile(filename)
+			if err != nil {
+				fmt.Printf("error reading file %q, skip\n", file)
+				return
+			}
+			index.Add(string(reed), filename)
+		}(file)
+	}
+
+	var index index.Index
+
+	for i := 0; i < len(files); i++ {
+		if index == nil {
+			index = <-indexes
+		} else {
+			index.Merge(<-indexes)
+		}
+	}
+	return index
 }
 
 func readQuery() string {
