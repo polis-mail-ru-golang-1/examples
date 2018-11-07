@@ -1,5 +1,5 @@
-# Inverted index search utility
+# Inverted index search service
 
 Building: `go install`
 
-Usage: `t2 books/hard books/noon books/prisoners books/time`
+Usage: `t2 localhost:8080 books/hard books/noon books/prisoners books/time`
