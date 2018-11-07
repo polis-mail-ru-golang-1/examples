@@ -1,79 +1,27 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"io/ioutil"
 	"os"
-	"sync"
 
 	"github.com/polis-mail-ru-golang-1/examples/t2/index"
-)
-
-var (
-	idxMutex = sync.RWMutex{}
+	"github.com/polis-mail-ru-golang-1/examples/t2/web"
 )
 
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Println("Usage of the utility: ./t2 file1.txt file2.txt")
+		fmt.Println("Usage of the utility: ./t2 localhost:8080 file1.txt file2.txt")
 		return
 	}
 
-	files := os.Args[1:]
+	files := os.Args[2:]
 	fmt.Println("Reading files: ", files)
-
-	// index := singleLoad(files)
-	// index := parallelLoad(files)
-	index := mutexLoad(files)
-
+	index := parallelLoad(files)
 	fmt.Printf("%+v\n", index.Info())
 
-	for {
-		q := readQuery()
-		results, err := index.Search(q)
-		if err != nil {
-			fmt.Printf("error searching: %q\n", err)
-			continue
-		}
-		for _, result := range results {
-			fmt.Printf("%s -- %d\n", result.File, result.Count)
-		}
-	}
-}
-
-func singleLoad(files []string) index.Index {
-	index := index.New()
-	for _, file := range files {
-		reed, err := ioutil.ReadFile(file)
-		if err != nil {
-			fmt.Printf("error reading file %q, skip\n", file)
-			continue
-		}
-		index.Add(string(reed), file)
-	}
-	return index
-}
-
-func mutexLoad(files []string) index.Index {
-	index := index.New()
-	wg := sync.WaitGroup{}
-	for _, file := range files {
-		wg.Add(1)
-		go func(filename string, wg *sync.WaitGroup) {
-			defer wg.Done()
-			reed, err := ioutil.ReadFile(filename)
-			if err != nil {
-				fmt.Printf("error reading file %q, skip\n", file)
-				return
-			}
-			idxMutex.Lock()
-			index.Add(string(reed), filename)
-			idxMutex.Unlock()
-		}(file, &wg)
-	}
-	wg.Wait()
-	return index
+	w := web.New(index, os.Args[1])
+	w.Start()
 }
 
 func parallelLoad(files []string) index.Index {
@@ -104,11 +52,4 @@ func parallelLoad(files []string) index.Index {
 		}
 	}
 	return index
-}
-
-func readQuery() string {
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Print("Enter query: ")
-	in, _ := reader.ReadString('\n')
-	return in
 }
