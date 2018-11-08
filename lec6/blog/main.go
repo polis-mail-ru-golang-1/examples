@@ -49,7 +49,8 @@ type server struct {
 
 func (s server) Start() error {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/posts", s.controller.Posts)
+	mux.HandleFunc("/", s.controller.Posts)
+	mux.HandleFunc("/post", s.controller.Post)
 
 	server := http.Server{
 		Addr:         s.listen,

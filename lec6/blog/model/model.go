@@ -1,7 +1,6 @@
 package model
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/go-pg/pg"
@@ -62,16 +61,6 @@ func (m Model) Comments(post Post) ([]Comment, error) {
 	comments := []Comment{}
 	err := m.pg.Model(&comments).Where("post_id = ?", post.ID).Order("id ASC").Select()
 	return comments, err
-}
-
-func (m Model) AddCommentInjection(comment Comment) (Comment, error) {
-	var id int
-	_, err := m.pg.Query(
-		pg.Scan(&id),
-		fmt.Sprintf("INSERT INTO \"comments\" (author, content, post_id) VALUES ('%s', '%s', %d) RETURNING \"id\"", comment.Author, comment.Content, comment.PostID),
-	)
-	comment.ID = id
-	return comment, err
 }
 
 func (m Model) AddComment(comment Comment) (Comment, error) {
