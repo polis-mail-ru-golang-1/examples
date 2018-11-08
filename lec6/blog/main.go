@@ -1,8 +1,13 @@
 package main
 
 import (
+	"net/http"
+	"time"
+
 	"github.com/polis-mail-ru-golang-1/examples/lec6/blog/config"
+	"github.com/polis-mail-ru-golang-1/examples/lec6/blog/controller"
 	"github.com/polis-mail-ru-golang-1/examples/lec6/blog/model"
+	"github.com/polis-mail-ru-golang-1/examples/lec6/blog/view"
 
 	"github.com/go-pg/pg"
 	"github.com/rs/zerolog"
@@ -13,40 +18,47 @@ func main() {
 	cfg, err := config.Load()
 	die(err)
 
-	logLevel, err := zerolog.ParseLevel(cfg.LogLevel)
+	level, err := zerolog.ParseLevel(cfg.LogLevel)
 	if err != nil {
 		panic(err)
 	}
 	zerolog.MessageFieldName = "msg"
-	log.Level(logLevel)
+	log.Level(level)
 
 	log.Print(cfg)
 
 	pgOpt, err := pg.ParseURL(cfg.PgSQL)
 	die(err)
-	pgDb := pg.Connect(pgOpt)
-	defer pgDb.Close()
+	pgdb := pg.Connect(pgOpt)
+	defer pgdb.Close()
 
-	m := model.New(pgDb)
-
-	test := model.Post{
-		Title:   "title",
-		Content: "content",
+	m := model.New(pgdb)
+	v := view.New()
+	c := controller.New(v, m)
+	s := server{
+		controller: c,
+		listen:     cfg.Listen,
 	}
-	test, err = m.AddPost(test)
-	die(err)
-	log.Print(test)
+	die(s.Start())
+}
 
-	p, err := m.Posts()
-	die(err)
-	for _, post := range p {
-		log.Print(post)
-		c, err := m.Comments(post)
-		die(err)
-		for _, comment := range c {
-			log.Print(comment)
-		}
+type server struct {
+	controller controller.Controller
+	listen     string
+}
+
+func (s server) Start() error {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/posts", s.controller.Posts)
+
+	server := http.Server{
+		Addr:         s.listen,
+		Handler:      mux,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
 	}
+
+	return server.ListenAndServe()
 }
 
 func die(err error) {

@@ -28,6 +28,7 @@ type Comment struct {
 	ID      int    `sql:"id,pk"`
 	Author  string `sql:"author"`
 	Content string `sql:"content"`
+	PostID  int
 }
 
 type Model struct {
@@ -67,7 +68,7 @@ func (m Model) AddCommentInjection(comment Comment) (Comment, error) {
 	var id int
 	_, err := m.pg.Query(
 		pg.Scan(&id),
-		fmt.Sprintf("INSERT INTO \"comments\" (author, content) VALUES ('%s', '%s') RETURNING \"id\"", comment.Author, comment.Content),
+		fmt.Sprintf("INSERT INTO \"comments\" (author, content, post_id) VALUES ('%s', '%s', %d) RETURNING \"id\"", comment.Author, comment.Content, comment.PostID),
 	)
 	comment.ID = id
 	return comment, err
@@ -77,8 +78,8 @@ func (m Model) AddComment(comment Comment) (Comment, error) {
 	var id int
 	_, err := m.pg.Query(
 		pg.Scan(&id),
-		"INSERT INTO \"comments\" (author, content) VALUES (?, ?) RETURNING \"id\"",
-		comment.Author, comment.Content,
+		"INSERT INTO \"comments\" (author, content, post_id) VALUES (?, ?, ?) RETURNING \"id\"",
+		comment.Author, comment.Content, comment.PostID,
 	)
 	comment.ID = id
 	return comment, err

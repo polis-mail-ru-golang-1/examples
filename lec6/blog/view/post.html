@@ -1,0 +1,13 @@
+<html>
+
+<body>
+    <h1>{{.Post.Title}}</h1>
+    <div>{{.Post.Content}}</div>
+    <h3>Comments</h3>
+    {{range .Comments}}
+    <b>{{.Author}}:</b>
+    {{.Content}}
+    {{end}}
+</body>
+
+</html>
