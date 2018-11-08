@@ -44,7 +44,7 @@ func (v View) Post(post model.Post, comments []model.Comment, wr io.Writer) {
 }
 
 func (v View) Error(err string, status int, wr io.Writer) {
-	v.postT.Execute(wr,
+	v.errorT.Execute(wr,
 		struct {
 			Status int
 			Error  string
