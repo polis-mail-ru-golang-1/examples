@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -29,7 +30,10 @@ func (c Controller) Posts(w http.ResponseWriter, r *http.Request) {
 		c.error(w, r, "server error", 500)
 		return
 	}
-	c.view.Posts(posts, w)
+	if err := c.view.Posts(posts, w); err != nil {
+		log.Error().Err(err).Msgf("Error rendering template %s", err)
+		c.error(w, r, "server error", 500)
+	}
 }
 
 func (c Controller) Post(w http.ResponseWriter, r *http.Request) {
@@ -51,10 +55,16 @@ func (c Controller) Post(w http.ResponseWriter, r *http.Request) {
 		c.error(w, r, "server error", 500)
 		return
 	}
-	c.view.Post(post, comments, w)
+	if err := c.view.Post(post, comments, w); err != nil {
+		log.Error().Err(err).Msgf("Error rendering template %s", err)
+		c.error(w, r, "server error", 500)
+	}
 }
 
 func (c Controller) error(w http.ResponseWriter, r *http.Request, err string, status int) {
 	log.Info().Msgf("Report error %s status %d", err, status)
-	c.view.Error(err, status, w)
+	if err := c.view.Error(err, status, w); err != nil {
+		log.Error().Err(err).Msgf("Error rendering error template %s", err)
+		fmt.Fprintln(w, "server error")
+	}
 }

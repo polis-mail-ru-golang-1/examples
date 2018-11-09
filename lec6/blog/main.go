@@ -33,7 +33,8 @@ func main() {
 	defer pgdb.Close()
 
 	m := model.New(pgdb)
-	v := view.New()
+	v, err := view.New()
+	die(err)
 	c := controller.New(v, m)
 	s := server{
 		controller: c,

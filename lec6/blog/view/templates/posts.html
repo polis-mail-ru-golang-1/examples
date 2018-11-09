@@ -1,14 +1,8 @@
-<html>
-<head>
-    <title>Posts</title>
-</head>
-<body>
+{{define "content"}}
     {{range .Posts}}
     <h1>{{.Title}}</h1>
     {{.Content}}
     <br />
     <a href="/post?id={{.ID}}">read more</a>
     {{end}}
-</body>
-
-</html>
+{{end}}
