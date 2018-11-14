@@ -1,0 +1,8 @@
+{
+    "Address": "db:5432",
+    "Username": "postgres",
+    "Password": "qwepoiq",
+    "Database": "elman309_db",
+    "ServerAddress": "0.0.0.0:8080",
+    "FirstStart": true
+}

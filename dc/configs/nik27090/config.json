@@ -1,0 +1,8 @@
+{
+    "ServerAddress": "0.0.0.0:8080",
+    "Direct": "/data",
+    "Addr": "db:5432",
+    "Username": "postgres",
+    "Pass": "qwepoiq",
+    "DB": "nik27090_db"
+}

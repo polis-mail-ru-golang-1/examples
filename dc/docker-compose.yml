@@ -1,0 +1,88 @@
+version: '3'
+services:
+
+    db:
+        image: postgres
+        restart: always
+        environment:
+            POSTGRES_PASSWORD: qwepoiq
+        ports:
+            - 5433:5432
+        volumes:
+            - pg-volume:/var/lib/postgresql/data
+
+    elman309:
+        build: ./sources/elman309
+        restart: always
+        ports:
+            - 8081:8080
+        volumes:
+            - ./configs/elman309/config.json:/root/config.json
+            - /data/:/data/
+
+      vadimrebrin:
+          build: ./sources/vadimrebrin
+          restart: always
+          ports:
+              - 8082:8080
+          volumes:
+              - ./configs/vadimrebrin/conf.json:/root/conf.json
+              - /data/:/data/
+
+      loginovArkadiy:
+          build: ./sources/loginovArkadiy
+          restart: always
+          ports:
+              - 8083:8080
+          volumes:
+              - ./configs/loginovArkadiy/config.json:/root/config.json
+              - /data/:/data/
+
+      medAlexey:
+          build: ./sources/medAlexey
+          restart: always
+          ports:
+              - 8084:8080
+          volumes:
+              - ./configs/medAlexey/config.json:/root/config.json
+              - /data/:/data/
+
+      valynok:
+          build: ./sources/Valynok
+          restart: always
+          ports:
+              - 8085:8080
+          volumes:
+              - /data/:/data/
+          environment:
+              LISTEN: 0.0.0.0:8080
+              PGSQL: postgres://postgres:qwepoiq@db:5432/valynok_db?sslmode=disable
+              LOG_LEVEL: debug
+              LOG_FILENAME: stdout
+              DIRECTORY_PATH: /data
+
+      rgrouse:
+          build: ./sources/rgrouse
+          restart: always
+          ports:
+              - 8086:8080
+          volumes:
+              - /data/:/data/
+          environment:
+	            LISTEN: 0.0.0.0:8080
+	            SDIR: /data
+	            LOG_LEVEL: debug
+	            PGSQL: postgres://rgrouse:qwedfgq4@51.15.112.136:5432/rgrouse_db?sslmode=disable
+	            MODEL: MAP
+
+      nik27090:
+          build: ./sources/nik27090
+          restart: always
+          ports:
+              - 8087:8080
+          volumes:
+              - ./configs/nik27090/config.json:/root/config.json
+              - /data/:/data/
+
+volumes:
+    pg-volume:
