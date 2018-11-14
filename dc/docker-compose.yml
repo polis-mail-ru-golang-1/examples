@@ -47,7 +47,7 @@ services:
             - /data/:/usr/app/data/
 
     valynok:
-        build: /root/sources/Valynok
+        build: /root/sources/valynok
         restart: always
         ports:
             - 8085:8080
