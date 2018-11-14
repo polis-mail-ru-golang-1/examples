@@ -1,4 +1,4 @@
 {
-    "dir": "/data/",
+    "dir": "./data/",
     "listener": "8080"
 }
