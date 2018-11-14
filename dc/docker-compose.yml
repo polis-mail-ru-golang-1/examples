@@ -59,7 +59,7 @@ services:
             LOG_LEVEL: debug
             LOG_FILENAME: stdout
             DIRECTORY_PATH: ./data/
-            INIT: true
+            INIT: "true"
 
     rgrouse:
         build: /root/sources/rgrouse
