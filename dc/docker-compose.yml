@@ -12,7 +12,7 @@ services:
             - pg-volume:/var/lib/postgresql/data
 
     elman309:
-        build: ./sources/elman309
+        build: /root/sources/elman309
         restart: always
         ports:
             - 8081:8080
@@ -21,7 +21,7 @@ services:
             - /data/:/data/
 
       vadimrebrin:
-          build: ./sources/vadimrebrin
+          build: /root/sources/vadimrebrin
           restart: always
           ports:
               - 8082:8080
@@ -30,7 +30,7 @@ services:
               - /data/:/data/
 
       loginovArkadiy:
-          build: ./sources/loginovArkadiy
+          build: /root/sources/loginovArkadiy
           restart: always
           ports:
               - 8083:8080
@@ -39,7 +39,7 @@ services:
               - /data/:/data/
 
       medAlexey:
-          build: ./sources/medAlexey
+          build: /root/sources/medAlexey
           restart: always
           ports:
               - 8084:8080
@@ -48,7 +48,7 @@ services:
               - /data/:/data/
 
       valynok:
-          build: ./sources/Valynok
+          build: /root/sources/Valynok
           restart: always
           ports:
               - 8085:8080
@@ -62,7 +62,7 @@ services:
               DIRECTORY_PATH: /data
 
       rgrouse:
-          build: ./sources/rgrouse
+          build: /root/sources/rgrouse
           restart: always
           ports:
               - 8086:8080
@@ -76,7 +76,7 @@ services:
 	            MODEL: MAP
 
       nik27090:
-          build: ./sources/nik27090
+          build: /root/sources/nik27090
           restart: always
           ports:
               - 8087:8080
