@@ -11,14 +11,14 @@ services:
         volumes:
             - pg-volume:/var/lib/postgresql/data
 
-    elman309:
-        build: /root/sources/elman309
-        restart: always
-        ports:
-            - 8081:8080
-        volumes:
-            - ./configs/elman309/config.json:/usr/app/config.json
-            - /data/:/usr/app/data
+    # elman309:
+    #     build: /root/sources/elman309
+    #     restart: always
+    #     ports:
+    #         - 8081:8080
+    #     volumes:
+    #         - ./configs/elman309/config.json:/usr/app/config.json
+    #         - /data/:/usr/app/data
 
       vadimrebrin:
           build: /root/sources/vadimrebrin
@@ -47,33 +47,33 @@ services:
               - ./configs/medAlexey/config.json:/usr/app/config.json
               - /data/:/usr/app/data/
 
-      valynok:
-          build: /root/sources/Valynok
-          restart: always
-          ports:
-              - 8085:8080
-          volumes:
-              - /data/:/usr/app/data/
-          environment:
-              LISTEN: 0.0.0.0:8080
-              PGSQL: postgres://postgres:qwepoiq@db:5432/valynok_db?sslmode=disable
-              LOG_LEVEL: debug
-              LOG_FILENAME: stdout
-              DIRECTORY_PATH: ./data
+      # valynok:
+      #     build: /root/sources/Valynok
+      #     restart: always
+      #     ports:
+      #         - 8085:8080
+      #     volumes:
+      #         - /data/:/usr/app/data/
+      #     environment:
+      #         LISTEN: 0.0.0.0:8080
+      #         PGSQL: postgres://postgres:qwepoiq@db:5432/valynok_db?sslmode=disable
+      #         LOG_LEVEL: debug
+      #         LOG_FILENAME: stdout
+      #         DIRECTORY_PATH: ./data
 
-      rgrouse:
-          build: /root/sources/rgrouse
-          restart: always
-          ports:
-              - 8086:8080
-          volumes:
-              - /data/:/usr/app/data/
-          environment:
-	            LISTEN: 0.0.0.0:8080
-	            SDIR: ./data
-	            LOG_LEVEL: debug
-	            PGSQL: postgres://rgropostgresuse:qwepoiq@db:5432/rgrouse_db?sslmode=disable
-	            MODEL: MAP
+      # rgrouse:
+      #     build: /root/sources/rgrouse
+      #     restart: always
+      #     ports:
+      #         - 8086:8080
+      #     volumes:
+      #         - /data/:/usr/app/data/
+      #     environment:
+	    #         LISTEN: 0.0.0.0:8080
+	    #         SDIR: ./data
+	    #         LOG_LEVEL: debug
+	    #         PGSQL: postgres://rgropostgresuse:qwepoiq@db:5432/rgrouse_db?sslmode=disable
+	    #         MODEL: MAP
 
       # nik27090:
       #     build: /root/sources/nik27090
