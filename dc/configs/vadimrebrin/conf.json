@@ -1,5 +1,5 @@
 {
     "Address": "0.0.0.0:8080",
     "LogLevel": "debug",
-    "FilesDir": "./data"
+    "FilesDir": "./data/"
 }
