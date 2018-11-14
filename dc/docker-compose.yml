@@ -28,7 +28,7 @@ services:
             - ./configs/vadimrebrin/conf.json:/usr/app/conf.json
             - /data/:/usr/app/data/
 
-    loginovArkadiy:
+    loginovarkadiy:
         build: /root/sources/loginovArkadiy
         restart: always
         ports:
@@ -37,7 +37,7 @@ services:
             - ./configs/loginovArkadiy/config.json:/usr/app/config.json
             - /data/:/usr/app/data/
 
-    medAlexey:
+    medalexey:
         build: /root/sources/medAlexey
         restart: always
         ports:
